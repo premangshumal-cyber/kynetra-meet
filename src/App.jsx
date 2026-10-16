@@ -424,8 +424,8 @@ function MeetingPage() {
             </form>
             <div className="ready-divider"><span>MEETING DETAILS</span></div>
             <div className="meeting-info"><span className="meeting-info-icon"><Link2 size={18}/></span><div><small>Meeting code</small><strong>{room}</strong></div></div>
-            <CopyLinkButton room={room} className="ready-copy"><Copy size={18}/> Copy invitation link</CopyLinkButton>
-            <p className="ready-privacy"><LockKeyhole size={14}/> Anyone with this link can request to join. Room moderation is handled by the video provider.</p>
+            <CopyLinkButton room={room} className="ready-copy" icon={false}><Copy size={18}/> Copy invitation link</CopyLinkButton>
+            <p className="ready-privacy"><LockKeyhole size={14}/> Anyone with this link may be able to join. Room access and moderation are handled by the video provider.</p>
           </section>
         </div>
         {isDemo && <div className="demo-banner"><CircleHelp size={17}/><span>Testing mode: Meetings use the public Jitsi Meet service. Hosts may be asked to sign in. Set <code>VITE_JITSI_DOMAIN</code> to your own Jitsi deployment for production.</span></div>}
