@@ -1,59 +1,43 @@
-# Kynetra
+# Kynetra — Online Meetings
 
-**Kynetra** is a responsive video-meeting web application featuring a premium landing page, shareable meeting rooms, a camera/microphone pre-join screen, and real video conferences through Jitsi's iframe API.
+Kynetra is a responsive, full-stack video conferencing project.
+
+**Live website:** https://kynetra-meet.vercel.app
+
+## Status
+
+The frontend is deployed. Demo calls are available through public Jitsi Meet. The server-side LiveKit conferencing integration and Supabase-backed account workspace are implemented in this repository, but are **not activated** until you connect and configure those external services. The public Jitsi service is not intended for production embedding.
 
 ## Features
 
-- Instantly create a cryptographically random meeting ID and share the link.
-- Join with a room ID or invitation link.
-- Preview and choose camera/microphone before entering the room.
-- Join with a display name, which is stored **only in your browser**.
-- In-call video, audio, screen sharing, text chat and participant controls provided by Jitsi Meet.
-- Copy room invitations and quickly rejoin recently visited rooms (browser-local only).
-- Responsive design and accessible form/button labels.
-- SPA routing configured for Vercel.
+- Responsive Kynetra homepage and meeting launch/join flows
+- Camera and microphone preview; device selection
+- Video meetings, screen sharing and chat through the chosen provider
+- Dedicated LiveKit video room component and API routes for creating rooms, issuing signed participant tokens, and authorized host removal/muting
+- Auth page for email/password sign-in, signup and password recovery
+- Meeting organizer dashboard with scheduled meeting CRUD
+- Supabase database schema with row-level security for profiles and meetings
+- Verified LiveKit webhooks for meeting status updates
+- GitHub Actions tests and Vercel deployment configuration
 
-## Quick start
+## Start locally
 
-Requirements: Node.js 20.19+ or 22.12+.
+Requires Node.js 22+.
 
 ```bash
 npm install
 cp .env.example .env
+npm run check
 npm run dev
-```
-
-Visit the local URL shown by Vite, usually `http://localhost:5173`.
-
-To compile:
-
-```bash
 npm run build
-npm run preview
 ```
 
-## Deploy to Vercel
+## Deployment
 
-1. Import this GitHub repository into a Vercel project.
-2. Framework: **Vite**. Build command: `npm run build`. Output directory: `dist`.
-3. Add `VITE_JITSI_DOMAIN` in Vercel's environment settings.
-4. Deploy. Direct links to `/meet/<room-id>` work using `vercel.json`.
+Read [DEPLOYMENT.md](docs/DEPLOYMENT.md) for instructions to configure a LiveKit server, Supabase Auth/PostgreSQL, environment variables, webhook signatures, security protection and external infrastructure. Read [ARCHITECTURE.md](docs/ARCHITECTURE.md) for the system design.
 
-## IMPORTANT: Demo conferencing vs production
+Server-side secrets must **never** have the `VITE_` prefix. Account registration and persistent schedules remain disabled until Supabase is configured. Switching `VITE_MEETING_ENGINE=livekit` without valid dedicated video credentials will produce explicit API errors.
 
-**This first release is a functional Jitsi-powered prototype, not a stand-alone video-conferencing backend.** It defaults to `meet.jit.si` only to let you test a video meeting without provisioning servers. [Jitsi states](https://jitsi.org/api/) that the public `meet.jit.si` service is **not intended for production application integrations**. Hosts may be required to log in to Jitsi; capacity, uptime, UI and policies are controlled by Jitsi. Kynetra does **not** provide its own sign-in, stored recordings, calendar synchronization, invite-email delivery, dedicated signaling infrastructure, host account roles or contractual SLA.
+## Boundaries
 
-Before public production use, provision your own Jitsi Meet deployment (or an appropriate commercial service), set `VITE_JITSI_DOMAIN=your.meet.hostname`, and test it with multiple participants and devices. For scalable professional hosting, evaluate appropriate bandwidth/capacity, STUN/TURN, monitoring, rate limits, abuse prevention, TLS and privacy policies. Jitsi may support additional security settings when correctly configured.
-
-The Kynetra invitation URL is not an access-control boundary. Treat links as shareable and configure waiting room/moderation/password policies in your conferencing provider when required. The camera and microphone preview uses local `getUserMedia`; it releases these local preview tracks before the iframe joins. Your browser will ask permission before using media.
-
-## Structure
-
-- `src/App.jsx` — site pages, invitation links, pre-join preview, Jitsi integration.
-- `src/styles.css` — responsive layout and visual design.
-- `src/main.jsx` — React entry point.
-- `vercel.json` — Vite output and client-side routing fallback.
-
-## License / services
-
-Source code can be customized by the repository owner. Video calling runs on the chosen **external** Jitsi service and remains subject to that service's terms. This project is not affiliated with Google Meet, Zoom, or Jitsi.
+This is not yet a tested commercial Google Meet/Zoom replacement. Dedicated media hosting and TURN, robust distributed abuse prevention, capacity/load tests, monitoring, recording storage, transcription, enterprise identity, waiting rooms, durable chat and accessibility/regulatory audits still require implementation or configuration. Do not use the Jitsi demo integration as the production media provider.
