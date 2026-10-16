@@ -1,4 +1,4 @@
-import { authenticatedUser } from './_lib/auth.js';
+import meetingsHandler from './meetings.js';
 import { ensureRoom, roomsClient } from './_lib/livekit.js';
 import { checkHost, hostKey, isRoom, newRoomId, rateLimit, required, safeError, send } from './_lib/core.js';
 
@@ -16,18 +16,6 @@ export default async function handler(req, res) {
     } catch (error) { return send(res, 502, safeError(error)); }
   }
 
-  // Room creation is privileged: invitees can join anonymously, but hosts must
-  // possess a valid Supabase account session.
-  const creator = await authenticatedUser(req, res);
-  if (!creator) return;
-
-  try {
-    const room = newRoomId();
-    await ensureRoom(room);
-    return send(res, 201, {
-      room,
-      hostKey: hostKey(room),
-      invitePath: '/meet/' + room
-    });
-  } catch (error) { return send(res, 502, safeError(error)); }
+  // Reuse the authenticated durable meeting creation endpoint.
+  return meetingsHandler(req, res);
 }

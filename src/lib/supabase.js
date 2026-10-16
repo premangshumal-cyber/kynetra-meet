@@ -13,20 +13,23 @@ export function makeMeetingCode() {
   crypto.getRandomValues(data);
   return 'kyn-' + Array.from(data, n => n.toString(16).padStart(2, '0')).join('');
 }
-export async function createMeetingRoom() {
-  if (import.meta.env.VITE_MEETING_ENGINE !== 'livekit') {
-    return { room: makeMeetingCode(), hostKey: '' };
-  }
+export async function meetingRequest(method, body) {
   if (!supabase) throw new Error('Connect account services before hosting meetings.');
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.access_token) throw new Error('Sign in to your account before hosting a meeting.');
-  const response = await fetch('/api/rooms', {
-    method: 'POST',
+  if (!session?.access_token) throw new Error('Sign in to your account before hosting meetings.');
+  const response = await fetch('/api/meetings', {
+    method,
     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
-    body: '{}'
+    ...(body ? { body: JSON.stringify(body) } : {})
   });
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.error || 'Could not create room.');
-  try { localStorage.setItem('kynetra-host:' + result.room, result.hostKey); } catch {}
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.error || 'Meeting request failed.');
+  return result;
+}
+export async function createMeetingRoom({ title = 'Instant meeting', description = '', scheduledAt = null } = {}) {
+  const result = await meetingRequest('POST', { title, description, scheduledAt });
+  if (result.hostKey) {
+    try { localStorage.setItem('kynetra-host:' + result.room, result.hostKey); } catch {}
+  }
   return result;
 }

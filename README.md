@@ -15,6 +15,7 @@ The frontend is deployed. Demo calls are available through public Jitsi Meet. Th
 - Video meetings, screen sharing and chat through the chosen provider
 - Dedicated LiveKit video room component and API routes for creating rooms, issuing signed participant tokens, and authorized host removal/muting
 - Auth page for email/password sign-in, signup and password recovery
+- Account-verified room creation and server-owned meeting records; cancellation prevents issuing fresh access tokens
 - Meeting organizer dashboard with scheduled meeting CRUD
 - Supabase database schema with row-level security for profiles and meetings
 - Verified LiveKit webhooks for meeting status updates

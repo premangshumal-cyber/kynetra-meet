@@ -25,6 +25,8 @@ Provision a Supabase project. Run `supabase/schema.sql` in the SQL editor once (
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 
+Every organizer-facing meeting mutation (creating and cancelling) is executed through `/api/meetings` with a validated Supabase access token. Users can only read their own meetings through RLS; clients cannot write meeting rows directly.
+
 To create a dedicated LiveKit meeting, hosts must be signed in. Set `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (the latter is safe to expose as a key, but keep server configuration separate). The host creation endpoint verifies the user's signed session with Supabase Auth; guest invitation recipients may still join without an account.
 
 For server features/webhooks, configure **private** `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (or the legacy `SUPABASE_ANON_KEY`), and `SUPABASE_SERVICE_ROLE_KEY` (do not put this in React or public repositories). Accounts and meeting schedules are protected by Row Level Security. Apply migrations to a staging project before using production data.

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, CalendarDays, Check, Clock3, Copy, LogOut, Plus, Search, Video, X } from 'lucide-react';
-import { createMeetingRoom, supabase } from '../lib/supabase.js';
+import { createMeetingRoom, meetingRequest, supabase } from '../lib/supabase.js';
 import './Workspace.css';
 
 function niceDate(iso) { return new Date(iso).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); }
@@ -70,22 +70,24 @@ export default function Dashboard({ Brand }) {
     const cleanTitle = title.trim() || 'Untitled meeting';
     setBusy(true); setError('');
     try {
-      const roomData = await createMeetingRoom();
-      const record = { owner_id: user.id, title: cleanTitle.slice(0, 120), description: desc.trim().slice(0, 500), room_code: roomData.room, scheduled_at: instant ? null : new Date(start).toISOString(), status: 'scheduled' };
-      const { data, error: insertError } = await supabase.from('meetings').insert(record).select('id,title,description,room_code,scheduled_at,status,created_at').single();
-      if (insertError) throw insertError;
-      setMeetings(old => [data, ...old]);
+      const result = await createMeetingRoom({
+        title: instant ? 'Instant meeting' : cleanTitle.slice(0, 120),
+        description: instant ? '' : desc.trim().slice(0, 500),
+        scheduledAt: instant ? null : new Date(start).toISOString()
+      });
+      setMeetings(old => [result.meeting, ...old]);
       setShowCreate(false); setTitle(''); setDesc('');
-      if (instant) navigate('/meet/' + data.room_code);
+      if (instant) navigate('/meet/' + result.room);
     } catch (err) { setError(err.message || 'Meeting could not be created.'); }
     finally { setBusy(false); }
   }
   async function cancel(item) {
-    if (!window.confirm('Cancel this meeting? The invitation link will remain visible to people who already have it.')) return;
+    if (!window.confirm('Cancel this meeting? The room will stop accepting new participants.')) return;
     if (!supabase) return;
-    const { error: updateError } = await supabase.from('meetings').update({ status: 'cancelled' }).eq('id', item.id);
-    if (updateError) setError(updateError.message);
-    else setMeetings(old => old.map(m => m.id === item.id ? { ...m, status: 'cancelled' } : m));
+    try {
+      await meetingRequest('PATCH', { id: item.id, action: 'cancel' });
+      setMeetings(old => old.map(m => m.id === item.id ? { ...m, status: 'cancelled' } : m));
+    } catch (err) { setError(err.message || 'Unable to cancel meeting.'); }
   }
   async function signOut() { if (supabase) await supabase.auth.signOut(); navigate('/'); }
   return <div className="kyn-workspace-page">

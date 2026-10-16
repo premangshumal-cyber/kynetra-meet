@@ -43,3 +43,14 @@ test('bearer parsing rejects malformed authorization headers', async () => {
     assert.equal(extractBearer(text), null);
   }
 });
+
+test('meeting validation accepts constrained details without trusting arbitrary fields', async () => {
+  const { validateMeetingDetails, isUuid } = await import('../api/_lib/validation.js');
+  const details = validateMeetingDetails({ title: 'Team call', description: 'Weekly update', owner_id: 'forged-id' });
+  assert.deepEqual(details, { title: 'Team call', description: 'Weekly update', scheduled_at: null });
+  assert.equal(validateMeetingDetails({ title: ' '.repeat(10) }).error, 'Title or description is too long.');
+  assert.ok(validateMeetingDetails({ title: 'x'.repeat(121) }).error);
+  assert.ok(validateMeetingDetails({ title: 'Meeting', scheduledAt: '2000-01-01T00:00:00Z' }).error);
+  assert.equal(isUuid('a6f2cb7c-1419-451d-a0de-f4930279e4b0'), true);
+  assert.equal(isUuid('foo'), false);
+});
