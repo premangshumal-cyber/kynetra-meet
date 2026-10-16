@@ -25,7 +25,7 @@ export function permit(req, res, methods = ['POST']) {
     const host = forwardedHost || req.headers.host;
     if (origin) {
       let url;
-      try { url = new URL(origin); } catch { return Boolean(send(res, 403, { error: 'Invalid request origin.' }) && false); }
+      try { url = new URL(origin); } catch { send(res, 403, { error: 'Invalid request origin.' }); return false; }
       if (url.host !== host || !['http:', 'https:'].includes(url.protocol)) {
         send(res, 403, { error: 'Cross-origin requests are not allowed.' });
         return false;

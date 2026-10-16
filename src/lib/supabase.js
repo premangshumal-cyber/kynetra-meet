@@ -17,8 +17,13 @@ export async function createMeetingRoom() {
   if (import.meta.env.VITE_MEETING_ENGINE !== 'livekit') {
     return { room: makeMeetingCode(), hostKey: '' };
   }
+  if (!supabase) throw new Error('Connect account services before hosting meetings.');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) throw new Error('Sign in to your account before hosting a meeting.');
   const response = await fetch('/api/rooms', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+    body: '{}'
   });
   const result = await response.json();
   if (!response.ok) throw new Error(result.error || 'Could not create room.');

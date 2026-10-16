@@ -1,4 +1,5 @@
 import LiveKitCall from './components/LiveKitCall.jsx';
+import { supabase } from './lib/supabase.js';
 import Auth from './pages/Auth.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -14,8 +15,19 @@ const IS_LIVEKIT = import.meta.env.VITE_MEETING_ENGINE === 'livekit';
 async function startNewMeeting(navigate) {
   if (!IS_LIVEKIT) return navigate('/meet/' + makeRoom());
   try {
+    if (!supabase) {
+      navigate('/auth');
+      return;
+    }
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      navigate('/auth');
+      return;
+    }
     const response = await fetch('/api/rooms', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+      body: '{}'
     });
     const data = await response.json();
     if (!response.ok || !data.room || !data.hostKey) throw new Error(data.error || 'Meeting creation failed.');

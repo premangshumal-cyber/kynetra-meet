@@ -2,6 +2,10 @@
 -- Enable Row Level Security; a public anon key MUST NOT bypass these policies.
 create extension if not exists pgcrypto;
 
+-- Internal routines must not live in the Data API-exposed public schema.
+create schema if not exists kynetra_internal;
+revoke all on schema kynetra_internal from public, anon, authenticated;
+
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text not null default '' check (char_length(display_name) <= 60),
@@ -11,7 +15,7 @@ alter table public.profiles enable row level security;
 create policy "owner reads profile" on public.profiles for select to authenticated using ((select auth.uid()) = id);
 create policy "owner updates profile" on public.profiles for update to authenticated using ((select auth.uid()) = id) with check ((select auth.uid()) = id);
 
-create or replace function public.kynetra_create_profile()
+create or replace function kynetra_internal.kynetra_create_profile()
 returns trigger language plpgsql security definer set search_path = '' as $$
 begin
   insert into public.profiles (id, display_name)
@@ -22,7 +26,8 @@ end;
 $$;
 drop trigger if exists kynetra_user_created on auth.users;
 create trigger kynetra_user_created after insert on auth.users
-for each row execute function public.kynetra_create_profile();
+for each row execute function kynetra_internal.kynetra_create_profile();
+revoke all on function kynetra_internal.kynetra_create_profile() from public, anon, authenticated;
 
 create table if not exists public.meetings (
   id uuid primary key default gen_random_uuid(),
@@ -50,7 +55,7 @@ with check ((select auth.uid()) = owner_id and status in ('scheduled', 'cancelle
 create policy "owner deletes meetings" on public.meetings
 for delete to authenticated using ((select auth.uid()) = owner_id);
 
-create or replace function public.kynetra_updated_at()
+create or replace function kynetra_internal.kynetra_updated_at()
 returns trigger language plpgsql set search_path = '' as $$
 begin
   new.updated_at = now();
@@ -59,7 +64,8 @@ end;
 $$;
 drop trigger if exists kynetra_meetings_updated on public.meetings;
 create trigger kynetra_meetings_updated before update on public.meetings
-for each row execute function public.kynetra_updated_at();
+for each row execute function kynetra_internal.kynetra_updated_at();
+revoke all on function kynetra_internal.kynetra_updated_at() from public, anon, authenticated;
 
 -- Ensure anonymous visitors cannot read meeting organizer details.
 revoke all on public.profiles from anon;

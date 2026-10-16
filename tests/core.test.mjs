@@ -35,3 +35,11 @@ test('requires all livekit environment values to report conferencing as configur
   assert.equal(isConfigured(),true);
   for (const [key,val] of Object.entries(prior)) { if (val===undefined) delete process.env[key]; else process.env[key]=val; }
 });
+
+test('bearer parsing rejects malformed authorization headers', async () => {
+  const { extractBearer } = await import('../api/_lib/auth.js');
+  assert.equal(extractBearer('Bearer sample.eyJhbGciOiJIUzI1NiJ9.signature'), 'sample.eyJhbGciOiJIUzI1NiJ9.signature');
+  for (const text of ['Basic abc', 'Bearer', 'Bearer a b', 'Bearer !@#', null, '']) {
+    assert.equal(extractBearer(text), null);
+  }
+});
