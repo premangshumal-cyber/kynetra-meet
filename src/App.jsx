@@ -110,7 +110,7 @@ function Header() {
         <nav className={'main-nav' + (open ? ' nav-open' : '')} aria-label="Main navigation">
           <a href="/#features" onClick={() => setOpen(false)}>Features</a>
           <a href="/#how-it-works" onClick={() => setOpen(false)}>How it works</a>
-          <a href="/#why-kynetra" onClick={() => setOpen(false)}>Why Kynetra</a>
+          <a href="/#why-kynetra" onClick={() => setOpen(false)}>Why Kynetra</a><Link to="/app" onClick={() => setOpen(false)}>My meetings</Link>
         </nav>
         <button className="btn btn-small btn-outline nav-action" type="button" onClick={() => navigate('/meet/' + makeRoom())}>
           Launch meeting <ArrowUpRight size={17} />
@@ -436,5 +436,5 @@ function MeetingPage() {
 }
 
 export default function App() {
-  return <Routes><Route path="/" element={<Home/>}/><Route path="/meet/:roomId" element={<MeetingPage/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Routes>;
+  return <Routes><Route path="/" element={<Home/>}/><Route path="/meet/:roomId" element={<MeetingPage/>}/><Route path="/auth" element={<Auth Brand={Brand}/>}/><Route path="/app" element={<Dashboard Brand={Brand}/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Routes>;
 }

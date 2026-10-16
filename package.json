@@ -6,13 +6,19 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0"
+    "preview": "vite preview --host 0.0.0.0",
+    "check": "node --test tests/*.test.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.1.0"
+    "react-router-dom": "^7.1.0",
+    "@livekit/components-react": "^2.9.0",
+    "@livekit/components-styles": "^1.1.6",
+    "livekit-client": "^2.15.0",
+    "livekit-server-sdk": "^2.13.0",
+    "@supabase/supabase-js": "^2.49.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
