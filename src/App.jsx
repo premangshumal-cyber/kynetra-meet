@@ -1,3 +1,6 @@
+import LiveKitCall from './components/LiveKitCall.jsx';
+import Auth from './pages/Auth.jsx';
+import Dashboard from './pages/Dashboard.jsx';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import {
@@ -6,6 +9,20 @@ import {
   Mic, MicOff, MonitorUp, Plus, Settings2, ShieldCheck, Sparkles, Users, Video,
   VideoOff, Wifi, X, Zap
 } from 'lucide-react';
+
+const IS_LIVEKIT = import.meta.env.VITE_MEETING_ENGINE === 'livekit';
+async function startNewMeeting(navigate) {
+  if (!IS_LIVEKIT) return navigate('/meet/' + makeRoom());
+  try {
+    const response = await fetch('/api/rooms', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
+    });
+    const data = await response.json();
+    if (!response.ok || !data.room || !data.hostKey) throw new Error(data.error || 'Meeting creation failed.');
+    try { localStorage.setItem('kynetra-host:' + data.room, data.hostKey); } catch {}
+    navigate('/meet/' + data.room);
+  } catch (error) { window.alert(error.message || 'Unable to create a meeting.'); }
+}
 
 const DEFAULT_DOMAIN = 'meet.jit.si';
 const RAW_DOMAIN = import.meta.env.VITE_JITSI_DOMAIN || DEFAULT_DOMAIN;
@@ -112,7 +129,7 @@ function Header() {
           <a href="/#how-it-works" onClick={() => setOpen(false)}>How it works</a>
           <a href="/#why-kynetra" onClick={() => setOpen(false)}>Why Kynetra</a><Link to="/app" onClick={() => setOpen(false)}>My meetings</Link>
         </nav>
-        <button className="btn btn-small btn-outline nav-action" type="button" onClick={() => navigate('/meet/' + makeRoom())}>
+        <button className="btn btn-small btn-outline nav-action" type="button" onClick={() => startNewMeeting(navigate)}>
           Launch meeting <ArrowUpRight size={17} />
         </button>
         <button className="mobile-menu-btn icon-btn" type="button" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} onClick={() => setOpen(!open)}>
@@ -187,7 +204,7 @@ function Home() {
             <h1>Better meetings.<br/><span>Brighter ideas.</span></h1>
             <p className="hero-description">Great things happen when we come together. Meet, share, and create with Kynetra — the beautifully simple way to stay connected.</p>
             <div className="hero-actions">
-              <button type="button" className="btn btn-primary btn-main" onClick={() => navigate('/meet/' + makeRoom())}>
+              <button type="button" className="btn btn-primary btn-main" onClick={() => startNewMeeting(navigate)}>
                 <Video size={20} strokeWidth={2.1}/> New meeting <ArrowRight size={18} className="cta-arrow"/>
               </button>
               <span className="action-divider">or</span>
@@ -224,9 +241,9 @@ function Home() {
           </div>
         </section>
 
-        <section className="steps-wrap" id="how-it-works"><div className="page-container steps-layout"><div className="steps-intro"><span className="section-kicker">SO SIMPLE IT JUST WORKS</span><h2>Three steps.<br/><span>Infinite possibilities.</span></h2><p>No learning curve, no fuss. Just people coming together.</p><button type="button" className="text-action" onClick={() => navigate('/meet/' + makeRoom())}>Start your first meeting <ArrowRight size={19}/></button></div><div className="steps-stack"><div className="step"><span className="step-number">01</span><span className="step-line"/><div><h3>Create your space</h3><p>Tap “New meeting” to create a unique meeting room, instantly.</p></div><span className="step-mini-icon"><Plus size={19}/></span></div><div className="step"><span className="step-number">02</span><span className="step-line"/><div><h3>Share the invite</h3><p>Copy your meeting link and send it to the people you want there.</p></div><span className="step-mini-icon"><Link2 size={19}/></span></div><div className="step"><span className="step-number">03</span><div><h3>Let ideas flow</h3><p>Join the call and get talking, presenting, and collaborating.</p></div><span className="step-mini-icon"><Sparkles size={19}/></span></div></div></div></section>
+        <section className="steps-wrap" id="how-it-works"><div className="page-container steps-layout"><div className="steps-intro"><span className="section-kicker">SO SIMPLE IT JUST WORKS</span><h2>Three steps.<br/><span>Infinite possibilities.</span></h2><p>No learning curve, no fuss. Just people coming together.</p><button type="button" className="text-action" onClick={() => startNewMeeting(navigate)}>Start your first meeting <ArrowRight size={19}/></button></div><div className="steps-stack"><div className="step"><span className="step-number">01</span><span className="step-line"/><div><h3>Create your space</h3><p>Tap “New meeting” to create a unique meeting room, instantly.</p></div><span className="step-mini-icon"><Plus size={19}/></span></div><div className="step"><span className="step-number">02</span><span className="step-line"/><div><h3>Share the invite</h3><p>Copy your meeting link and send it to the people you want there.</p></div><span className="step-mini-icon"><Link2 size={19}/></span></div><div className="step"><span className="step-number">03</span><div><h3>Let ideas flow</h3><p>Join the call and get talking, presenting, and collaborating.</p></div><span className="step-mini-icon"><Sparkles size={19}/></span></div></div></div></section>
 
-        <section className="cta-section page-container" id="why-kynetra"><div className="cta-panel"><div className="cta-dots"/><div className="cta-copy"><span className="cta-kicker"><Sparkles size={15}/> CONNECT WITH PURPOSE</span><h2>Every great idea<br/>starts with a conversation.</h2><p>Make room for yours. Bring your people together on Kynetra.</p><button type="button" onClick={() => navigate('/meet/' + makeRoom())} className="btn btn-white">Create a meeting <ArrowUpRight size={18}/></button></div><div className="cta-art" aria-hidden="true"><span className="cta-orbit orbit-a"/><span className="cta-orbit orbit-b"/><span className="cta-orbit orbit-c"/><span className="cta-bubble b1"><Video size={31}/></span><span className="cta-bubble b2"><MessageCircle size={22}/></span><span className="cta-bubble b3"><Sparkles size={22}/></span></div></div></section>
+        <section className="cta-section page-container" id="why-kynetra"><div className="cta-panel"><div className="cta-dots"/><div className="cta-copy"><span className="cta-kicker"><Sparkles size={15}/> CONNECT WITH PURPOSE</span><h2>Every great idea<br/>starts with a conversation.</h2><p>Make room for yours. Bring your people together on Kynetra.</p><button type="button" onClick={() => startNewMeeting(navigate)} className="btn btn-white">Create a meeting <ArrowUpRight size={18}/></button></div><div className="cta-art" aria-hidden="true"><span className="cta-orbit orbit-a"/><span className="cta-orbit orbit-b"/><span className="cta-orbit orbit-c"/><span className="cta-bubble b1"><Video size={31}/></span><span className="cta-bubble b2"><MessageCircle size={22}/></span><span className="cta-bubble b3"><Sparkles size={22}/></span></div></div></section>
       </main>
       <footer className="site-footer"><div className="page-container footer-inner"><Brand/><p>Where connections become possibilities.</p><span>© {new Date().getFullYear()} Kynetra. Built for better conversations.</span></div></footer>
     </div>
@@ -389,8 +406,8 @@ function MeetingPage() {
     return (
       <div className="call-page">
         <div className="call-topbar"><Brand light/><div className="call-room-meta"><span className="call-live-dot"/> <span className="call-room-label">Meeting in progress</span><span className="call-separator"/> <span className="call-room-id">{room}</span></div><div className="call-actions"><CopyLinkButton room={room} className="call-copy-btn"/><button type="button" onClick={leave} className="call-exit-btn">Exit room <X size={16}/></button></div></div>
-        <JitsiCall room={room} displayName={name.trim()} cameraOn={cameraOn} micOn={micOn} onLeave={leave}/>
-        {isDemo && <p className="call-demo-note">Demo conferencing provided by Jitsi Meet. Public meet.jit.si may require host sign-in; use a dedicated Jitsi deployment for production.</p>}
+        {IS_LIVEKIT ? <LiveKitCall room={room} displayName={name.trim()} cameraOn={cameraOn} micOn={micOn} onLeave={leave}/> : <JitsiCall room={room} displayName={name.trim()} cameraOn={cameraOn} micOn={micOn} onLeave={leave}/>}
+        {!IS_LIVEKIT && isDemo && <p className="call-demo-note">Demo conferencing provided by Jitsi Meet. Public meet.jit.si may require host sign-in; use a dedicated Jitsi deployment for production.</p>}
       </div>
     );
   }
@@ -428,7 +445,7 @@ function MeetingPage() {
             <p className="ready-privacy"><LockKeyhole size={14}/> Anyone with this link may be able to join. Room access and moderation are handled by the video provider.</p>
           </section>
         </div>
-        {isDemo && <div className="demo-banner"><CircleHelp size={17}/><span>Testing mode: Meetings use the public Jitsi Meet service. Hosts may be asked to sign in. Set <code>VITE_JITSI_DOMAIN</code> to your own Jitsi deployment for production.</span></div>}
+        {!IS_LIVEKIT && isDemo && <div className="demo-banner"><CircleHelp size={17}/><span>Testing mode: Meetings use the public Jitsi Meet service. Hosts may be asked to sign in. Set <code>VITE_JITSI_DOMAIN</code> to your own Jitsi deployment for production.</span></div>}
       </main>
       <footer className="prejoin-footer page-container"><span>© {new Date().getFullYear()} Kynetra</span><span>Better together, wherever.</span></footer>
     </div>
