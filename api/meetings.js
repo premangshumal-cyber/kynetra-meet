@@ -1,12 +1,26 @@
 import { createClient } from '@supabase/supabase-js';
-import { authenticatedUser } from './_lib/auth.js';
+import { authenticatedUser, extractBearer } from './_lib/auth.js';
 import { hostKey, isConfigured, newRoomId, permit, rateLimit, safeError, send } from './_lib/core.js';
 import { ensureRoom, roomExists, roomsClient } from './_lib/livekit.js';
 import { isUuid, validateMeetingDetails } from './_lib/validation.js';
 
-function database() {
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
-  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+function database(req) {
+  const url = process.env.SUPABASE_URL;
+  const privilegedKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
+  if (!url || (!privilegedKey && !publishableKey)) return null;
+
+  // Prefer RLS-scoped access when using a publishable key. The user's JWT is
+  // verified separately, and the database enforces owner-only access.
+  const token = extractBearer(req.headers.authorization);
+  if (!privilegedKey) {
+    if (!token) return null;
+    return createClient(url, publishableKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: 'Bearer ' + token } }
+    });
+  }
+  return createClient(url, privilegedKey, {
     auth: { persistSession: false, autoRefreshToken: false }
   });
 }
@@ -14,10 +28,10 @@ function database() {
 export default async function handler(req, res) {
   if (!permit(req, res, ['GET', 'POST', 'PATCH'])) return;
   if (!rateLimit(req, res, 'meetings-' + req.method, req.method === 'POST' ? 12 : 80)) return;
-  const db = database();
-  if (!db) return send(res, 503, { error: 'Meeting database is not configured on the server.' });
   const user = await authenticatedUser(req, res);
   if (!user) return;
+  const db = database(req);
+  if (!db) return send(res, 503, { error: 'Meeting database is not configured on the server.' });
 
   if (req.method === 'GET') {
     const { data, error } = await db.from('meetings')

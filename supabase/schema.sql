@@ -47,8 +47,16 @@ alter table public.meetings enable row level security;
 
 create policy "owner reads meetings" on public.meetings
 for select to authenticated using ((select auth.uid()) = owner_id);
--- Meeting creation, cancellation and deletion are server-side only.
--- The browser's publishable/anon key can select its own rows, not forge meetings.
+-- Signed-in users may only create their own scheduled meeting and cancel
+-- their own current meeting. Column grants protect identity and metadata.
+create policy "owner creates scheduled meetings" on public.meetings
+for insert to authenticated
+with check ((select auth.uid()) = owner_id and status = 'scheduled');
+
+create policy "owner cancels own meetings" on public.meetings
+for update to authenticated
+using ((select auth.uid()) = owner_id and status in ('scheduled', 'active'))
+with check ((select auth.uid()) = owner_id and status = 'cancelled');
 
 create or replace function kynetra_internal.kynetra_updated_at()
 returns trigger language plpgsql set search_path = '' as $$
@@ -67,3 +75,5 @@ revoke all on public.profiles from anon;
 revoke all on public.meetings from anon;
 grant select, update on public.profiles to authenticated;
 grant select on public.meetings to authenticated;
+grant insert (owner_id, title, description, room_code, scheduled_at, status) on public.meetings to authenticated;
+grant update (status) on public.meetings to authenticated;

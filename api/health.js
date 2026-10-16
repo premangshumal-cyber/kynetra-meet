@@ -6,7 +6,7 @@ export default function handler(req, res) {
     service: 'kynetra',
     status: 'ok',
     conferencing: isConfigured() ? 'livekit-configured' : 'demo-jitsi-only',
-    persistence: process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY ? 'configured' : 'not-configured',
+    persistence: process.env.SUPABASE_URL && (process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY) ? 'configured' : 'not-configured',
     authentication: process.env.SUPABASE_URL && (process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY) ? 'configured' : 'not-configured',
     productionReady: Boolean(isConfigured() && process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && (process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY)),
     timestamp: new Date().toISOString()

@@ -6,7 +6,7 @@ Kynetra is a responsive, full-stack video conferencing project.
 
 ## Status
 
-The frontend is deployed. Demo calls are available through public Jitsi Meet. The server-side LiveKit conferencing integration and Supabase-backed account workspace are implemented in this repository, but are **not activated** until you connect and configure those external services. The public Jitsi service is not intended for production embedding.
+The frontend is deployed. Demo calls are available through public Jitsi Meet. The server-side LiveKit conferencing integration and Supabase-backed account workspace are included in this repository. Account hosting and scheduling are enabled when the linked project URL and publishable key are configured. Independent LiveKit conferencing remains inactive until the media service is provisioned. The public Jitsi service is not intended for production embedding.
 
 ## Features
 
@@ -37,7 +37,7 @@ npm run build
 
 Read [DEPLOYMENT.md](docs/DEPLOYMENT.md) for instructions to configure a LiveKit server, Supabase Auth/PostgreSQL, environment variables, webhook signatures, security protection and external infrastructure. Read [ARCHITECTURE.md](docs/ARCHITECTURE.md) for the system design.
 
-Server-side secrets must **never** have the `VITE_` prefix. Account registration and persistent schedules remain disabled until Supabase is configured. Switching `VITE_MEETING_ENGINE=livekit` without valid dedicated video credentials will produce explicit API errors.
+Server-side secrets must **never** have the `VITE_` prefix. Supabase Auth and meeting scheduling use row-level security and support a publishable-key-only server integration. A service-role key is still needed for server-side guest meeting cancellation checks and LiveKit event persistence. Switching `VITE_MEETING_ENGINE=livekit` without valid dedicated video credentials will produce explicit API errors.
 
 ## Boundaries
 

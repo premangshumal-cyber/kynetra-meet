@@ -45,7 +45,7 @@ export default function Auth({ Brand }) {
         if (password.length < 8) throw new Error('Use a password of at least 8 characters.');
         const { data, error: authError } = await supabase.auth.signUp({
           email: email.trim().toLowerCase(), password,
-          options: { data: { display_name: name.trim().slice(0, 60) } }
+          options: { data: { display_name: name.trim().slice(0, 60) }, emailRedirectTo: window.location.origin + '/auth' }
         });
         if (authError) throw authError;
         if (data.session) navigate('/app', { replace: true });
