@@ -43,8 +43,8 @@ Without Supabase, homepage/demo meetings still work; account and scheduling func
 ## 4. Testing
 
 ```bash
-npm ci
-npm test  # or npm run check if test script absent
+npm install
+npm run check
 npm run build
 ```
 
