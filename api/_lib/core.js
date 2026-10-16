@@ -4,7 +4,7 @@ const requestCounts = new Map();
 export const ROOM_PATTERN = /^kyn-[a-f0-9]{16,32}$/;
 
 export function isRoom(value) { return typeof value === 'string' && ROOM_PATTERN.test(value); }
-export function cleanName(name) { return typeof name === 'string' ? name.trim().replace(/[<>\x00-\x1F]/g, '').slice(0, 60) : ''; }
+export function cleanName(name) { return typeof name === 'string' ? name.trim().replace(/[<>\x00-\x1F]/g, '').trim().slice(0, 60) : ''; }
 export function newRoomId() { return 'kyn-' + crypto.randomBytes(16).toString('hex'); }
 export function isConfigured() { return Boolean(process.env.LIVEKIT_URL && process.env.LIVEKIT_API_KEY && process.env.LIVEKIT_API_SECRET && process.env.KYNETRA_HOST_SECRET); }
 export function send(res, status, value) {
