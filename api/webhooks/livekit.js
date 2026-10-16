@@ -30,11 +30,12 @@ export default async function handler(req, res) {
     if (!isRoom(room)) return send(res, 200, { ok: true, ignored: true });
     if (!['room_started', 'room_finished'].includes(event.event)) return send(res, 200, { ok: true });
 
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const adminKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!process.env.SUPABASE_URL || !adminKey) {
       return send(res, 200, { ok: true, persistence: 'not-configured' });
     }
 
-    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+    const supabase = createClient(process.env.SUPABASE_URL, adminKey, {
       auth: { persistSession: false, autoRefreshToken: false }
     });
     const status = event.event === 'room_started' ? 'active' : 'completed';

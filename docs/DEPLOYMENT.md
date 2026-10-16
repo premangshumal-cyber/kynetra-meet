@@ -29,9 +29,9 @@ Every organizer-facing meeting mutation (creating and cancelling) is executed th
 
 To create a dedicated LiveKit meeting, hosts must be signed in. Set `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (the latter is safe to expose as a key, but keep server configuration separate). The host creation endpoint verifies the user's signed session with Supabase Auth; guest invitation recipients may still join without an account.
 
-The Kynetra backend can access the database using verified users' own JWTs and Supabase RLS. This supports sign-in and meeting scheduling without the service-role key. Configure `SUPABASE_SERVICE_ROLE_KEY` securely before enabling dedicated LiveKit guest token issuance and webhook-driven status updates.
+The Kynetra backend can access the database using verified users' own JWTs and Supabase RLS. This supports sign-in and meeting scheduling without the server secret key. Configure `SUPABASE_SECRET_KEY` (or legacy `SUPABASE_SERVICE_ROLE_KEY`) securely before enabling dedicated LiveKit guest token issuance and webhook-driven status updates.
 
-For server features/webhooks, configure **private** `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (or the legacy `SUPABASE_ANON_KEY`), and `SUPABASE_SERVICE_ROLE_KEY` (do not put this in React or public repositories). Accounts and meeting schedules are protected by Row Level Security. Apply migrations to a staging project before using production data.
+For server features/webhooks, configure **private** `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (or the legacy `SUPABASE_ANON_KEY`), and `SUPABASE_SECRET_KEY` (or legacy `SUPABASE_SERVICE_ROLE_KEY`) (do not put this in React or public repositories). Accounts and meeting schedules are protected by Row Level Security. Apply migrations to a staging project before using production data.
 
 Without Supabase, homepage/demo meetings still work; account and scheduling functionality intentionally shows a configuration message rather than storing fake records.
 
@@ -40,7 +40,7 @@ Without Supabase, homepage/demo meetings still work; account and scheduling func
 1. Restrict anonymous room creation with *distributed* edge rate limits, CAPTCHA or authentication; the example best-effort per-instance map is not enough on serverless.
 2. Configure email verification, password policies, optional MFA, bot and spam mitigation. Use HTTPS everywhere.
 3. Decide on your attendee authorization and waiting-room policy. A random meeting link is a bearer invitation, **not** end-to-end participant authentication.
-4. Put LiveKit API secret, service-role key, and host signing key in server-only secret storage; rotate regularly.
+4. Put LiveKit API secret, server secret key, and host signing key in server-only secret storage; rotate regularly.
 5. Set backups, row retention, audit logging, incident handling, a privacy policy and an acceptable-use policy.
 6. Set LiveKit media traffic limits/cost alerts, metrics, alerts and SLOs. The included UI supports live video/audio, screen share and *ephemeral* in-meeting chat; it does not automatically record or store chat messages.
 7. For recording, add a separately configured LiveKit Egress worker, recordings bucket, permissions and explicit consent before advertising it.

@@ -35,9 +35,9 @@ npm run build
 
 ## Deployment
 
-Read [DEPLOYMENT.md](docs/DEPLOYMENT.md) for instructions to configure a LiveKit server, Supabase Auth/PostgreSQL, environment variables, webhook signatures, security protection and external infrastructure. Read [ARCHITECTURE.md](docs/ARCHITECTURE.md) for the system design.
+Read the [LiveKit activation checklist](docs/LIVEKIT_SETUP.md) and [DEPLOYMENT.md](docs/DEPLOYMENT.md) for instructions to configure a LiveKit server, Supabase Auth/PostgreSQL, environment variables, webhook signatures, security protection and external infrastructure. Read [ARCHITECTURE.md](docs/ARCHITECTURE.md) for the system design.
 
-Server-side secrets must **never** have the `VITE_` prefix. Supabase Auth and meeting scheduling use row-level security and support a publishable-key-only server integration. A service-role key is still needed for server-side guest meeting cancellation checks and LiveKit event persistence. Switching `VITE_MEETING_ENGINE=livekit` without valid dedicated video credentials will produce explicit API errors.
+Server-side secrets must **never** have the `VITE_` prefix. Supabase Auth and meeting scheduling use row-level security and support a publishable-key-only server integration. A server-only Supabase secret key (or legacy service_role key) is still needed for server-side guest meeting cancellation checks and LiveKit event persistence. Switching `VITE_MEETING_ENGINE=livekit` without valid dedicated video credentials will produce explicit API errors.
 
 ## Boundaries
 

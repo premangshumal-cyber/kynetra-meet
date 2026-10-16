@@ -6,7 +6,7 @@ import { isUuid, validateMeetingDetails } from './_lib/validation.js';
 
 function database(req) {
   const url = process.env.SUPABASE_URL;
-  const privilegedKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const privilegedKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
   const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
   if (!url || (!privilegedKey && !publishableKey)) return null;
 

@@ -10,11 +10,12 @@ export default async function handler(req, res) {
   if (!isRoom(room) || name.length < 1) return send(res, 400, { error: 'Enter a valid meeting code and display name.' });
 
   try {
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const adminKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!process.env.SUPABASE_URL || !adminKey) {
       return send(res, 503, { error: 'Meeting authorization is not configured.' });
     }
     {
-      const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+      const db = createClient(process.env.SUPABASE_URL, adminKey, { auth: { persistSession: false, autoRefreshToken: false } });
       const result = await db.from('meetings').select('status').eq('room_code', room).maybeSingle();
       if (result.error) return send(res, 503, { error: 'Meeting access could not be verified.' });
       if (result.data?.status === 'cancelled') return send(res, 403, { error: 'This meeting has been cancelled.' });
